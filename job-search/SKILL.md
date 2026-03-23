@@ -23,6 +23,57 @@ locations before executing any module.
 
 ---
 
+## Module 0: Session Folder Setup (ALWAYS run first)
+
+**Run this automatically at the start of every session — no trigger phrase needed.**
+
+This module creates a structured output folder for the current job search session so all deliverables
+are organized and findable.
+
+### Steps
+
+1. **Generate a unique root folder name** using this format:
+   `JobSearch_YYYY-MM-DD_[SearchTerm]`
+   - `YYYY-MM-DD` = today's date (use `date +%Y-%m-%d` via Bash)
+   - `[SearchTerm]` = a short slug for the search (e.g., `PM_BayArea`, `TPM_Remote`, `Director_AI`)
+   - If no specific search term is known yet, use `General`
+   - Example: `JobSearch_2026-03-23_TPM_BayArea`
+
+2. **Create the root folder and all five subfolders** under the workspace:
+   ```
+   /sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/
+     JobSearch_YYYY-MM-DD_[SearchTerm]/
+       resumes_p13n/          ← Module 10: customized resumes per job
+       Coverletters/          ← Modules 3 & 4: referral + recruiter cover letters
+       IG_timeline/           ← Module 5: infographic career timeline
+       AIP/                   ← Module 6: AI portfolio files
+       Skill_Fitness_Analysis/← Modules 9 & 1: fit analysis reports and job search table
+   ```
+   Create via Bash:
+   ```bash
+   ROOT="/sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/JobSearch_$(date +%Y-%m-%d)_[SearchTerm]"
+   mkdir -p "$ROOT/resumes_p13n" "$ROOT/Coverletters" "$ROOT/IG_timeline" "$ROOT/AIP" "$ROOT/Skill_Fitness_Analysis"
+   ```
+
+3. **Store the root path** as a variable (e.g., `SESSION_ROOT`) and use it in all subsequent modules
+   so every output file lands in the correct subfolder.
+
+4. **Tell the user** the folder that was created:
+   > "Session folder created: `JobSearch_[date]_[term]/`
+   > All outputs will be saved there automatically."
+
+### Subfolder reference (use in all modules)
+
+| Subfolder | What goes here |
+|-----------|---------------|
+| `resumes_p13n/` | Customized .docx resumes (Module 10) |
+| `Coverletters/` | Cover letters to referrals and recruiters (Modules 3 & 4) |
+| `IG_timeline/` | Infographic HTML career timeline (Module 5) |
+| `AIP/` | AI portfolio HTML one-pager and related files (Module 6) |
+| `Skill_Fitness_Analysis/` | Fit analysis reports and job search results table (Modules 1 & 9) |
+
+---
+
 ## Module 1: Job Search & Applications
 
 **Trigger phrases:** "find jobs", "search roles", "what's out there", "search for PM/TPM positions"
@@ -42,6 +93,7 @@ locations before executing any module.
 
 ### Output format
 A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
+Save the full results table as `Job_Search_Results_[date].docx` directly in the **session root** (`$SESSION_ROOT/`) — not in a subfolder — so it's immediately visible when the folder is opened.
 
 ---
 
@@ -76,7 +128,8 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
    - **Para 3**: The ask — specific, easy-to-fulfill: "Would you be open to a 15-min call?" or "Would you be
      comfortable forwarding my resume to the hiring team?"
 5. Keep it under 200 words. Professional but human — not corporate-stiff.
-6. Save as a .docx file using the docx skill: `[Referral Letter - Company - Person.docx]`.
+6. Save as a .docx file using the docx skill to `$SESSION_ROOT/Coverletters/`:
+   `Coverletters/CoverLetter_Referral_[Company]_[Person].docx`
 
 ---
 
@@ -94,7 +147,8 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
      job description details the user provides).
    - **Para 3**: Clear CTA — "I'd love to connect for 15 minutes" + attach resume note.
 4. Keep it under 250 words. Keyword-optimized for ATS where possible.
-5. Save as a .docx file: `[Recruiter Letter - Company - Role.docx]`.
+5. Save as a .docx file to `$SESSION_ROOT/Coverletters/`:
+   `Coverletters/CoverLetter_Recruiter_[Company]_[Role].docx`
 
 ---
 
@@ -113,7 +167,7 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
    - Include education markers (MBA 2016, BE 2003).
    - Include certifications as a separate track at the bottom.
 3. Make it visually polished — professional enough to share as a portfolio piece.
-4. Save as `Resume_Timeline_Divakar_BV.html` in the workspace folder.
+4. Save as `Resume_Timeline_Divakar_BV.html` to `$SESSION_ROOT/IG_timeline/`.
 
 ---
 
@@ -131,7 +185,8 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
    - Section 4: Certifications (NVIDIA GTC, MIT AI, Generative AI Applications, etc.).
    - Footer: Website + LinkedIn.
 3. Clean, modern design. Dark header, white content sections, subtle accent color.
-4. Save as `AI_Portfolio_Divakar_BV.html` in the workspace folder.
+4. Save as `AI_Portfolio_Divakar_BV.html` to `$SESSION_ROOT/AIP/`.
+   Any supporting assets (images, CSS, JS if split out) also go in `AIP/`.
 
 ---
 
@@ -167,7 +222,7 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
    - **Leadership Story** (1 paragraph): A cohesive narrative suitable for an interview "tell me about yourself" answer.
    - **Interview Sound Bites** (3-5 one-liners): Memorable phrases drawn from the feedback that Divakar can use
      to answer "What are your greatest strengths?" in interviews.
-3. Save as `360_Feedback_Summary.docx` if the user wants a file.
+3. Save as `360_Feedback_Summary_[date].docx` to `$SESSION_ROOT/Skill_Fitness_Analysis/` if the user wants a file.
 
 ---
 
@@ -188,7 +243,11 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
    - Fit score + verdict ("Strong Candidate", "Good Candidate — Address Gaps", "Stretch Role").
    - A "what to emphasize" list for the cover letter and interview.
    - A "gap bridging" suggestion for each ❌ (e.g., "highlight X from your Alexa experience").
-6. Ask: "Want me to write a cover letter tailored to this role?"
+6. Save the fit analysis as a .docx report to `$SESSION_ROOT/Skill_Fitness_Analysis/`:
+   `Skill_Fitness_Analysis/FitAnalysis_[Company]_[Role].docx`
+   If analyzing multiple roles at once, save a combined report:
+   `Skill_Fitness_Analysis/FitAnalysis_All_Roles_[date].docx`
+7. Ask: "Want me to write a cover letter tailored to this role?"
 
 ---
 
@@ -230,8 +289,9 @@ optimization, and surfacing the right achievements without fabricating anything.
 5. **ATS check** — Scan the customized resume for the JD's top 10 keywords. Flag any that are
    missing and suggest natural insertion points.
 
-6. **Output** — Save as a .docx file using the `docx` skill:
-   `Resume_Divakar_BV_[Company]_[Role].docx`
+6. **Output** — Save as a .docx file using the `docx` skill to `$SESSION_ROOT/resumes_p13n/`:
+   `resumes_p13n/Resume_[Company]_[Role]_[FitScore]_[Verdict].docx`
+   Example: `resumes_p13n/Resume_Google_SrPM_ImageSearch_94_Strong.docx`
    Preserve the original ATS-friendly formatting from the base resume.
 
 7. **Show a change summary** — List what was changed and why, so Divakar can review and approve
@@ -262,9 +322,28 @@ These modules are designed to chain together naturally. Common flows:
 
 ## Notes
 
-- Always save output files to the workspace folder: `/sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/`
+### Folder structure (always created by Module 0 at session start)
+
+```
+WBR2026_3_14_Claude/
+  JobSearch_YYYY-MM-DD_[SearchTerm]/       ← SESSION ROOT
+    Job_Search_Results_[date].docx         ← Job search table (Module 1) — at ROOT level
+    Recruiters_and_Referrals_[date].docx   ← Recruiter/referral guide (Module 2) — at ROOT level
+    resumes_p13n/                          ← Customized resumes (Module 10)
+    Coverletters/                          ← Cover letters to referrals + recruiters (Modules 3 & 4)
+    IG_timeline/                           ← Infographic career timeline HTML (Module 5)
+    AIP/                                   ← AI portfolio HTML (Module 6)
+    Skill_Fitness_Analysis/                ← Fit analysis reports + 360 feedback (Modules 9 & 8)
+```
+
+> **Job search results file** (`Job_Search_Results_[date].docx`) and the **Recruiters & Referrals**
+> file go directly in the **session root folder** — not in a subfolder — so they're the first thing
+> visible when opening the session folder.
+
+### Tool references
 - For .docx files, use the `docx` skill.
 - For .pptx files, use the `pptx` skill.
-- Apollo tools are available under `mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__*`.
+- Apollo: `mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__*` (requires paid plan for people search)
 - Indeed: `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__search_jobs`
 - Dice: `mcp__eef6ddc6-db09-4609-aaee-84a402ca5245__search_jobs`
+- Workspace base: `/sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/`
