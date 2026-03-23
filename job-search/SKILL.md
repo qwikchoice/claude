@@ -92,8 +92,28 @@ are organized and findable.
 5. Ask: "Want me to draft a cover letter or find a referral at any of these companies?"
 
 ### Output format
-A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
-Save the full results table as `Job_Search_Results_[date].docx` directly in the **session root** (`$SESSION_ROOT/`) — not in a subfolder — so it's immediately visible when the folder is opened.
+Present results as a markdown table in the conversation. Flag top 3 roles with ⭐.
+
+Also save as `Job_Search_Results_[date].docx` directly in the **session root** (`$SESSION_ROOT/`) — not in a subfolder — so it's the first file visible when the folder is opened.
+
+The saved .docx file must include **all of the following columns** in a landscape-oriented table:
+
+| # | Company | Role | Location | Type | Salary | Fit % | Verdict | Key Strengths | Gaps | Apply Link |
+|---|---------|------|----------|------|--------|-------|---------|--------------|------|------------|
+
+- **#** — row number
+- **Company** — company name
+- **Role** — full job title
+- **Location** — city/state or "Remote"
+- **Type** — "Bay Area" or "Remote"
+- **Salary** — range if available, else "N/A"
+- **Fit %** — numeric score (e.g., 94%)
+- **Verdict** — Strong / Good / Stretch (color-coded: green / amber / red)
+- **Key Strengths** — top 2-3 matching skills/experiences from profile.md
+- **Gaps** — top 1-2 gaps or missing requirements
+- **Apply Link** — clickable hyperlink to the job posting URL
+
+The Apply Link column must contain a live hyperlink (not just the raw URL) so the user can click directly from the document to open the job posting.
 
 ---
 
