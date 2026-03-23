@@ -6,10 +6,11 @@ description: >
   job search, job applications, finding a job, looking for roles, TPM roles, PM roles, program manager
   positions, finding a recruiter, finding a referral, writing a cover letter, outreach to recruiter,
   resume timeline, career infographic, AI portfolio, interview availability, 360 feedback, skill fit,
-  job fit analysis, job duties match, or any variation of career/job-hunting tasks. This skill connects
-  to Indeed, Dice, and Apollo for live data, and generates professional documents as outputs. Trigger
-  this skill even when the user gives only a partial signal — e.g., "find me some jobs", "write a note
-  to a recruiter", "how well do I fit this role?", "prep me for interviews".
+  job fit analysis, job duties match, customize resume, tailor resume, resume for job description,
+  or any variation of career/job-hunting tasks. This skill connects to Indeed, Dice, and Apollo for
+  live data, and generates professional documents as outputs. Trigger this skill even when the user
+  gives only a partial signal — e.g., "find me some jobs", "write a note to a recruiter",
+  "how well do I fit this role?", "prep me for interviews", "customize my resume for this role".
 ---
 
 # Job Search Skill — Divakar BV
@@ -191,12 +192,65 @@ A clean markdown table with clickable apply links. Flag top 3 roles with ⭐.
 
 ---
 
+## Module 10: Resume Customization
+
+**Trigger phrases:** "customize my resume", "tailor resume", "update resume for this role",
+"resume for job description", "tweak my resume", "optimize resume"
+
+The goal is to produce a version of Divakar's resume that is precisely tuned for a specific job
+description — emphasizing the most relevant experiences, mirroring the JD's language for ATS
+optimization, and surfacing the right achievements without fabricating anything.
+
+### Steps
+
+1. **Get the JD** — user pastes it, or retrieve via `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__get_job_details`.
+
+2. **Run a fit analysis first** (Module 9) if not already done — identifies which experiences to
+   emphasize (✅), which to reframe (🟡), and which to downplay (❌ gaps).
+
+3. **Read `references/resume_customization_guide.md`** for detailed rewriting rules.
+
+4. **Customize the resume** by making targeted edits across these sections:
+
+   - **Profile Summary** — Rewrite the top 3-4 lines to mirror the JD's exact language and role title.
+     If the JD says "Staff TPM", lead with that. If it emphasizes "AI infrastructure", surface that.
+
+   - **Experience bullets** — For each relevant role, rewrite up to 3 bullets to:
+     - Use verbs and keywords from the JD (e.g., if JD says "drove alignment", use "drove alignment")
+     - Lead with the metric most relevant to the role (revenue, scale, speed, team size)
+     - Remove or compress bullets for unrelated work at that company
+
+   - **Skills section** — Reorder to put JD-matched skills first. Add any skills Divakar has but
+     that weren't prominent in the original resume (e.g., if JD emphasizes "OKRs" and Divakar uses
+     them but didn't list it explicitly).
+
+   - **Section ordering** — If the JD is heavily AI/ML focused, move the AI/ML skills cluster to
+     the top of the Skills section. If it's a Program Management role, lead with PM skills.
+
+5. **ATS check** — Scan the customized resume for the JD's top 10 keywords. Flag any that are
+   missing and suggest natural insertion points.
+
+6. **Output** — Save as a .docx file using the `docx` skill:
+   `Resume_Divakar_BV_[Company]_[Role].docx`
+   Preserve the original ATS-friendly formatting from the base resume.
+
+7. **Show a change summary** — List what was changed and why, so Divakar can review and approve
+   before sending. Format as: `[Section] → [What changed] → [Why: matches JD requirement X]`
+
+### Important rules
+- Never fabricate experience, metrics, or skills not present in `references/profile.md`.
+- Keep changes targeted — only edit what improves fit. Don't rewrite everything.
+- Preserve the ATS-friendly structure (no tables, no text boxes, clean heading hierarchy).
+- If a gap is real and can't be bridged, note it honestly rather than obscuring it.
+
+---
+
 ## Workflow Chains
 
 These modules are designed to chain together naturally. Common flows:
 
-**Full Application Flow**: Module 1 → Module 9 → Module 3 or 4 → Module 2
-*Find jobs → Fit analysis → Cover letter → Find referral*
+**Full Application Flow**: Module 1 → Module 9 → Module 10 → Module 3 or 4 → Module 2
+*Find jobs → Fit analysis → Customize resume → Cover letter → Find referral*
 
 **Portfolio Prep**: Module 5 → Module 6
 *Timeline → AI Portfolio*
