@@ -28,16 +28,20 @@
 | 2021–2023 | Meta (Menlo Park, CA) | Sr. Technical Product Manager | AI/ML, Marketplace |
 | 2023–present | SynergIQ (Menlo Park, CA) | Head of Product | Agentic AI, RAG LLM |
 
+## LinkedIn Summary
+
+Accomplished AI/ML Product Leader with over 15 years of expertise in driving business strategies, leading cross-functional product teams, and implementing innovative technical solutions. Proven track record in cloud computing, eCommerce, B2B, and AI/ML data science products at Meta, Amazon, Alexa, and AWS.
+
 ## Key Achievements (Use in Cover Letters & Fit Analysis)
 
-1. **Meta FB Marketplace**: Defined and launched AI roadmap — dynamic filters, free items module, user engagement features. Exceeded engagement, search relevance, UX and infra goals.
-2. **Amazon Search**: Delivered $60M revenue via AI/ML search projects across 15+ countries. Led Prime Day 2019 risk mitigation for 6 search services.
-3. **Amazon Alexa**: Launched NFSI internationally in 6 countries (UK, Canada, India, Australia, Japan, Germany). Built cross-functional synergies across 7 teams.
-4. **AWS EC2**: Managed product roadmap for 10 EC2 regions. Authored pricing proposals and secured CEO approval on business strategy.
+1. **Meta FB Marketplace**: Defined 3-year strategic vision and AI/ML roadmap for FB Marketplace Search — dynamic filters, free items module, relevance improvements. Marketplace Link Impressions (MLI) +20%, NDCG (relevance) +10%.
+2. **Amazon Search**: Delivered $60M revenue via AI/ML search programs across 15+ countries. Led Prime Day 2019 risk mitigation for 6 search services.
+3. **Amazon Alexa**: Launched NFSI internationally in 6 countries (UK, Canada, India, Australia, Japan, Germany) with privacy controls. Built cross-functional synergies across 7 teams.
+4. **AWS EC2**: Successfully launched 10 EC2 regions (Ohio, London, Canada, China, Paris, Ningxia & Gov regions). Authored pricing proposals and secured CEO approval on business strategy.
 5. **Mastercard**: Managed 60 weekly + 45 critical releases across 18 workstreams.
-6. **Equinix**: Initiated and negotiated a $6M OSS/BSS transformation deal.
+6. **Equinix**: Initiated, negotiated, and managed a $6M OSS/BSS transformation deal.
 7. **T-Mobile**: Rolled out fraud prevention controls in 50,000+ retail stores.
-8. **SynergIQ**: Spearheaded strategic vision for RAG LLM application; guided graduate students for NVIDIA Conference 2024.
+8. **SynergIQ**: Spearheaded strategic vision for RAG LLM application; guided graduate students for NVIDIA GTC Conference 2024.
 
 ## Skills Profile
 
@@ -50,12 +54,16 @@
 - Python, Java, Perl, PL/SQL, Bash, REST/GraphQL/SOAP/gRPC
 - Power BI, Tableau, SQL, Excel VBA
 
+### GenAI Platforms
+- ChatGPT, Microsoft Copilot, Claude Code, Claude Cowork, Skills and Workflows
+
 ### Product & Program
 - Strategic product roadmaps, OKRs, KPIs
 - Cross-functional team leadership (up to 7+ teams)
 - C-level Executive Reporting (Director, VP, CEO level)
 - Go-to-Market strategy, pricing, internationalization (16+ countries)
-- Vendor & partner management, annotation and audit workflows
+- Competitive intelligence, market research, product requirements, prioritization
+- Vendor & partner management, negotiations, annotation and audit workflows
 - Legal, data security, privacy compliance
 
 ### Business Domains

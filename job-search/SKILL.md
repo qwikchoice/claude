@@ -5,72 +5,17 @@ description: >
   PM, Program Manager, and TPM roles in the Bay Area or remote. Use this skill whenever the user mentions:
   job search, job applications, finding a job, looking for roles, TPM roles, PM roles, program manager
   positions, finding a recruiter, finding a referral, writing a cover letter, outreach to recruiter,
-  resume timeline, career infographic, AI portfolio, interview availability, 360 feedback, skill fit,
-  job fit analysis, job duties match, customize resume, tailor resume, resume for job description,
-  or any variation of career/job-hunting tasks. This skill connects to Indeed, Dice, and Apollo for
-  live data, and generates professional documents as outputs. Trigger this skill even when the user
-  gives only a partial signal — e.g., "find me some jobs", "write a note to a recruiter",
-  "how well do I fit this role?", "prep me for interviews", "customize my resume for this role".
+  skill fit, job fit analysis, job duties match, build a resume, create a resume, customize resume,
+  generate resume, tailor resume, or any variation of career/job-hunting tasks. This skill connects to
+  Indeed, Dice, and Apollo for live data, and generates professional documents as outputs. Trigger this
+  skill even when the user gives only a partial signal — e.g., "find me some jobs", "write a note to a
+  recruiter", "how well do I fit this role?", "build me a resume for this role".
 ---
 
 # Job Search Skill — Divakar BV
 
-A comprehensive, end-to-end career acceleration workflow. Each section below is a **module** — invoke
-the relevant one(s) based on the user's request. Multiple modules can be chained in one session.
-
-Always read `references/profile.md` first so you know Divakar's background, target roles, and
-locations before executing any module.
-
----
-
-## Module 0: Session Folder Setup (ALWAYS run first)
-
-**Run this automatically at the start of every session — no trigger phrase needed.**
-
-This module creates a structured output folder for the current job search session so all deliverables
-are organized and findable.
-
-### Steps
-
-1. **Generate a unique root folder name** using this format:
-   `JobSearch_YYYY-MM-DD_[SearchTerm]`
-   - `YYYY-MM-DD` = today's date (use `date +%Y-%m-%d` via Bash)
-   - `[SearchTerm]` = a short slug for the search (e.g., `PM_BayArea`, `TPM_Remote`, `Director_AI`)
-   - If no specific search term is known yet, use `General`
-   - Example: `JobSearch_2026-03-23_TPM_BayArea`
-
-2. **Create the root folder and all five subfolders** under the workspace:
-   ```
-   /sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/
-     JobSearch_YYYY-MM-DD_[SearchTerm]/
-       resumes_p13n/          ← Module 10: customized resumes per job
-       Coverletters/          ← Modules 3 & 4: referral + recruiter cover letters
-       IG_timeline/           ← Module 5: infographic career timeline
-       AIP/                   ← Module 6: AI portfolio files
-       Skill_Fitness_Analysis/← Modules 9 & 1: fit analysis reports and job search table
-   ```
-   Create via Bash:
-   ```bash
-   ROOT="/sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/JobSearch_$(date +%Y-%m-%d)_[SearchTerm]"
-   mkdir -p "$ROOT/resumes_p13n" "$ROOT/Coverletters" "$ROOT/IG_timeline" "$ROOT/AIP" "$ROOT/Skill_Fitness_Analysis"
-   ```
-
-3. **Store the root path** as a variable (e.g., `SESSION_ROOT`) and use it in all subsequent modules
-   so every output file lands in the correct subfolder.
-
-4. **Tell the user** the folder that was created:
-   > "Session folder created: `JobSearch_[date]_[term]/`
-   > All outputs will be saved there automatically."
-
-### Subfolder reference (use in all modules)
-
-| Subfolder | What goes here |
-|-----------|---------------|
-| `resumes_p13n/` | Customized .docx resumes (Module 10) |
-| `Coverletters/` | Cover letters to referrals and recruiters (Modules 3 & 4) |
-| `IG_timeline/` | Infographic HTML career timeline (Module 5) |
-| `AIP/` | AI portfolio HTML one-pager and related files (Module 6) |
-| `Skill_Fitness_Analysis/` | Fit analysis reports and job search results table (Modules 1 & 9) |
+Each section below is a **module** — invoke the relevant one based on the user's request.
+Only load `references/profile.md` when explicitly required by the module (Modules 2 and 3).
 
 ---
 
@@ -78,292 +23,221 @@ are organized and findable.
 
 **Trigger phrases:** "find jobs", "search roles", "what's out there", "search for PM/TPM positions"
 
+**Default search parameters (no profile read needed):**
+- Roles: Senior Technical Product Manager, Senior Product Manager, Senior Program Manager, TPM
+- Locations: San Francisco CA, San Jose CA, Mountain View CA, Palo Alto CA, Remote
+
 ### Steps
-1. Identify the role type (TPM, PM, Program Manager, or a specific variant the user mentions).
+1. Identify the role type from user input, or use defaults above.
 2. Search **Indeed** (`mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__search_jobs`) and **Dice**
-   (`mcp__eef6ddc6-db09-4609-aaee-84a402ca5245__search_jobs`) in parallel.
-   - Default locations: San Francisco CA, San Jose CA, Mountain View CA, Palo Alto CA, plus Remote.
-   - Run location searches in parallel (one call per location per board) to maximize coverage.
-3. Score each result against Divakar's profile (see `references/profile.md`) using this rubric:
+   (`mcp__eef6ddc6-db09-4609-aaee-84a402ca5245__search_jobs`) in parallel across all default locations.
+3. Score each result using this rubric:
    - **Strong fit** (3 pts each): AI/ML focus, Bay Area / Remote, FAANG-adjacent company, Senior title
-   - **Good fit** (2 pts each): Product + Technical hybrid role, Cloud/Infra domain, cross-functional scope
+   - **Good fit** (2 pts each): Product + Technical hybrid, Cloud/Infra domain, cross-functional scope
    - **Weak fit** (1 pt each): Relevant industry but mismatched seniority or domain
-4. Present results as a ranked table: Role | Company | Location | Salary | Fit Score | Apply Link.
-5. Ask: "Want me to draft a cover letter or find a referral at any of these companies?"
-
-### Output format
-Present results as a markdown table in the conversation. Flag top 3 roles with ⭐.
-
-Also save as `Job_Search_Results_[date].docx` directly in the **session root** (`$SESSION_ROOT/`) — not in a subfolder — so it's the first file visible when the folder is opened.
-
-The saved .docx file must include **all of the following columns** in a landscape-oriented table:
-
-| # | Company | Role | Location | Type | Salary | Fit % | Verdict | Key Strengths | Gaps | Apply Link |
-|---|---------|------|----------|------|--------|-------|---------|--------------|------|------------|
-
-- **#** — row number
-- **Company** — company name
-- **Role** — full job title
-- **Location** — city/state or "Remote"
-- **Type** — "Bay Area" or "Remote"
-- **Salary** — range if available, else "N/A"
-- **Fit %** — numeric score (e.g., 94%)
-- **Verdict** — Strong / Good / Stretch (color-coded: green / amber / red)
-- **Key Strengths** — top 2-3 matching skills/experiences from profile.md
-- **Gaps** — top 1-2 gaps or missing requirements
-- **Apply Link** — clickable hyperlink to the job posting URL
-
-The Apply Link column must contain a live hyperlink (not just the raw URL) so the user can click directly from the document to open the job posting.
+4. Present as a ranked markdown table: Role | Company | Location | Salary | Fit Score | Apply Link.
+   Flag top 3 with ⭐.
 
 ---
 
-## Module 2: Find Referral & Recruiter
+## Module 2: Custom Resume Builder
 
-**Trigger phrases:** "find me a referral", "who do I know at X", "find a recruiter at Y", "who's hiring at Z"
+**Trigger phrases:** "build a resume", "create a resume", "customize my resume", "generate resume for",
+"tailor resume to", "write a resume for this job", "make me a resume", "resume for [role] at [company]"
 
-### Steps
-1. Identify the target company (from the job search results or user input).
-2. Search Apollo for people at that company:
-   - **Recruiters**: Search `mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__apollo_mixed_people_api_search`
-     with title filters like "Recruiter", "Talent Acquisition", "Technical Sourcer", "Engineering Recruiter".
-   - **Referrals**: Search for people with titles like "Senior Product Manager", "TPM", "Engineering Manager",
-     "Director of Product" — people who would plausibly refer a peer.
-3. For each result, note: Name, Title, LinkedIn URL (if available), email (if available).
-4. Present a short list: top 2-3 recruiters and top 2-3 potential referrals.
-5. Offer to draft a cover letter or outreach note for any of them.
+### Step 1 — Extract JD Signals
 
----
+Read `references/resume_instructions.md` Phase 1 rules. From the JD, extract:
+- Role type (PM / TPM / Program Manager / Director)
+- Top 8–10 must-have keywords and skills
+- Business goals and domain signals (AI/ML, Cloud, Search, Ecommerce, etc.)
+- Leadership and seniority signals
+- Company name (for output filename)
 
-## Module 3: Cover Letter — To a Referral
+### Step 2 — Select Template
 
-**Trigger phrases:** "cover letter to referral", "write a note for referral", "intro request", "referral outreach"
+| JD signals | Template |
+|---|---|
+| Product Manager, Head of Product, VP Product, Product Lead, PM | `Template_PM.docx` |
+| Technical Program Manager, TPM, Program Manager, Engineering PM | `Template_TPM.docx` |
+| Ambiguous or hybrid | Ask the user before proceeding |
 
-### Steps
-1. Get the target person's name, title, and company (from Module 2 or user input).
-2. Get the target role (from Module 1 or user input).
-3. Read `references/cover_letter_referral_template.md` for tone and structure guidance.
-4. Write a personalized 3-paragraph letter:
-   - **Para 1**: Warm opener — establish the connection (mutual network, shared experience, admiration for their work).
-   - **Para 2**: Brief pitch — 2-3 sentences on Divakar's most relevant experience for the role (use profile.md).
-   - **Para 3**: The ask — specific, easy-to-fulfill: "Would you be open to a 15-min call?" or "Would you be
-     comfortable forwarding my resume to the hiring team?"
-5. Keep it under 200 words. Professional but human — not corporate-stiff.
-6. Save as a .docx file using the docx skill to `$SESSION_ROOT/Coverletters/`:
-   `Coverletters/CoverLetter_Referral_[Company]_[Person].docx`
+Templates path: `/sessions/gallant-cool-volta/mnt/JobAgent/Templates/`
 
----
+### Step 3 — Plan All Customizations
 
-## Module 4: Cover Letter — To a Recruiter
+Before writing any code, explicitly decide each of the following. Use `references/resume_instructions.md`
+as the rulebook for every decision. **Never fabricate — only select, reorder, or filter content that
+already exists in the template. Do not add metrics, experiences, or achievements not present in the template.**
 
-**Trigger phrases:** "cover letter to recruiter", "cold outreach recruiter", "email to recruiter", "recruiter note"
+**Role tagline** — Write a specific tagline matching the JD.
+Format: `SENIOR [ROLE] | [DOMAIN 1] & [DOMAIN 2]`
+Example: `SENIOR PRODUCT MANAGER | AI PLATFORM & ECOMMERCE SEARCH`
 
-### Steps
-1. Get the recruiter's name, company, and the target role.
-2. Read `references/cover_letter_recruiter_template.md` for structure guidance.
-3. Write a 3-paragraph letter:
-   - **Para 1**: Hook — lead with the most impressive brand name + outcome from Divakar's background
-     (e.g., "I led AI/ML product roadmaps at Meta and Amazon, delivering $60M+ in search revenue").
-   - **Para 2**: Role alignment — show why this specific role/company fits (use Apollo company data or
-     job description details the user provides).
-   - **Para 3**: Clear CTA — "I'd love to connect for 15 minutes" + attach resume note.
-4. Keep it under 250 words. Keyword-optimized for ATS where possible.
-5. Save as a .docx file to `$SESSION_ROOT/Coverletters/`:
-   `Coverletters/CoverLetter_Recruiter_[Company]_[Role].docx`
+**Profile Summary** — Write 3–5 lines using the LinkedIn base voice, layered with JD language:
+- Line 1: `[Role] with 15+ years [domain from JD] at [top brands]...`
+- Lines 2–3: 1–2 strongest JD-aligned achievements with actual metrics from the template
+- Line 4: `Key strengths: [keyword 1]  |  [keyword 2]  |  [keyword 3]` — mirror JD phrasing exactly
 
----
+**Key Achievements** — Decide the order of the 4 existing achievements (most JD-relevant first).
+Do not rewrite any achievement.
 
-## Module 5: Resume Infographic Timeline
+**Core Competencies** (PM template only) — Select 12–16 competency items that match JD keywords.
+List which items to keep; remove the rest.
 
-**Trigger phrases:** "resume timeline", "career infographic", "visual resume", "career visualization", "timeline"
+**Experience bullets per role** — For each role, select 3–5 bullets and rank them (most JD-relevant first):
+- SynergIQ: select from 4 available bullets
+- Meta: select from 5 available bullets
+- Amazon Search CX: select from 4 available bullets
+- Amazon Alexa: select from 3 available bullets
+- AWS EC2: select from 3 available bullets (PM) / 2 available bullets (TPM)
+- Earlier experience: include or compress to 1 line based on JD domain match
 
-### Steps
-1. Read Divakar's career history from `references/profile.md`.
-2. Build a visual HTML timeline (single file, clean and printable):
-   - Chronological layout: 2003 → present, left-to-right.
-   - Each role: Company logo placeholder, Title, Date range, 1-line impact statement.
-   - Color-coded by domain: Telecom (blue), Finance (green), Cloud/Amazon (orange), AI/ML/Meta (purple),
-     Startup/AI (teal).
-   - Include key skills acquired at each role as small tags.
-   - Include education markers (MBA 2016, BE 2003).
-   - Include certifications as a separate track at the bottom.
-3. Make it visually polished — professional enough to share as a portfolio piece.
-4. Save as `Resume_Timeline_Divakar_BV.html` to `$SESSION_ROOT/IG_timeline/`.
+**Skills** — Decide which skill categories and specific items to keep. Reorder categories: most
+JD-relevant category first. Remove individual skills that don't appear in the JD.
 
----
+**Certifications** — Reorder by JD relevance (AI certs first for AI roles, PMP first for program roles).
 
-## Module 6: AI Portfolio One-Pager
+### Step 4 — Generate the Custom DOCX
 
-**Trigger phrases:** "AI portfolio", "portfolio page", "show my AI work", "AI projects one-pager"
+Use `/sessions/gallant-cool-volta/resume-gen/generate_templates.js` as the base.
 
-### Steps
-1. Read Divakar's AI/ML achievements from `references/profile.md`.
-2. Build a single-page HTML portfolio:
-   - Header: Name, tagline ("Agentic AI | Product Leadership | 15+ Years"), contact links.
-   - Section 1: AI/ML Product Experience (Meta Marketplace AI, Amazon Search AI/ML, Alexa AI, RAG LLM apps).
-   - Section 2: Key AI Outcomes (metrics, revenue, scale).
-   - Section 3: AI Tools & Skills (Claude Code/Cowork, RAG, LangChain, Prompt Engineering, Generative AI).
-   - Section 4: Certifications (NVIDIA GTC, MIT AI, Generative AI Applications, etc.).
-   - Footer: Website + LinkedIn.
-3. Clean, modern design. Dark header, white content sections, subtle accent color.
-4. Save as `AI_Portfolio_Divakar_BV.html` to `$SESSION_ROOT/AIP/`.
-   Any supporting assets (images, CSS, JS if split out) also go in `AIP/`.
+Write a new script `/sessions/gallant-cool-volta/resume-gen/generate_custom_resume.js` that:
+1. Copies the appropriate build function (`buildPMTemplate` or `buildTPMTemplate`) from the base script
+2. Replaces every `[[AGENT: ...]]` placeholder with the actual text from Step 3
+3. Removes every `agentNote(...)` call — agent instructions must NOT appear in the final resume
+4. Implements bullet selection: include only the bullets chosen in Step 3, in the decided order
+5. Implements skill filtering: include only the skills and categories chosen in Step 3
+6. Sets the output path to the dated folder (Step 5 below)
 
----
+Run the script:
+```bash
+cd /sessions/gallant-cool-volta/resume-gen && node generate_custom_resume.js
+```
 
-## Module 7: Interview Timeslots
+### Step 5 — Save to Dated Output Folder
 
-**Trigger phrases:** "interview timeslots", "my availability", "schedule interview", "send my availability", "when am I free"
+```bash
+DATE=$(date +%Y-%m-%d)
+mkdir -p /sessions/gallant-cool-volta/mnt/JobAgent/Outputs/$DATE
+```
 
-### Steps
-1. Ask the user for their available days/times (or a general preference like "weekday mornings PT").
-2. Generate a professional, copy-paste-ready availability block:
-   ```
-   Thank you for reaching out! Here are some times I'm available for a call (all times Pacific):
+Filename format: `[Company]_[RoleAbbrev]_Divakar_BV_[YYYYMMDD].docx`
 
-   - Monday, [date]: 9am–11am, 2pm–4pm
-   - Wednesday, [date]: 10am–12pm
-   - Thursday, [date]: 9am–11am
+Examples:
+- `Google_PM_Divakar_BV_20260325.docx`
+- `Meta_TPM_Divakar_BV_20260325.docx`
+- `Stripe_ProgramManager_Divakar_BV_20260325.docx`
 
-   Happy to accommodate other times — just let me know what works best for you.
-   ```
-3. Format it for three common contexts: email body, LinkedIn message (shorter), and calendar invite note.
+### Step 6 — Quality Check
+
+Run the Pre-Output Checklist from `references/resume_instructions.md` Phase 11.
+Report the estimated Quality Score (Phase 10 formula). Flag any reject conditions.
 
 ---
 
-## Module 8: 360-Degree Feedback Summary
-
-**Trigger phrases:** "360 feedback", "performance feedback", "feedback summary", "synthesize my reviews"
-
-### Steps
-1. Ask the user to paste in raw feedback (from peers, managers, skip-levels, self-reviews).
-2. Synthesize into a structured narrative:
-   - **Top Strengths** (3-5): Specific, evidence-backed, with direct quotes where powerful.
-   - **Growth Areas** (2-3): Framed constructively — "opportunity to..." not "weakness in...".
-   - **Leadership Story** (1 paragraph): A cohesive narrative suitable for an interview "tell me about yourself" answer.
-   - **Interview Sound Bites** (3-5 one-liners): Memorable phrases drawn from the feedback that Divakar can use
-     to answer "What are your greatest strengths?" in interviews.
-3. Save as `360_Feedback_Summary_[date].docx` to `$SESSION_ROOT/Skill_Fitness_Analysis/` if the user wants a file.
-
----
-
-## Module 9: Job Duties vs. Skill Fit Analysis
+## Module 3: Job Duties vs. Skill Fit Analysis
 
 **Trigger phrases:** "fit analysis", "how well do I fit", "job fit", "skill match", "compare to job description",
 "gap analysis", "should I apply"
 
 ### Steps
-1. Get the job description (user pastes it, or retrieve via `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__get_job_details`).
-2. Extract the key requirements: must-have skills, nice-to-haves, years of experience, domain expertise.
-3. Map each requirement against Divakar's profile (from `references/profile.md`):
+1. Get the job description — user pastes it, or retrieve via `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__get_job_details`.
+2. Read `references/profile.md` (full profile needed for accurate mapping).
+3. Extract from the JD: must-have skills, nice-to-haves, years of experience, domain expertise.
+4. Map each requirement against the profile:
    - ✅ **Strong match**: Direct experience, specific examples available.
    - 🟡 **Partial match**: Adjacent experience, transferable skills.
    - ❌ **Gap**: Not evidenced in resume.
-4. Calculate an overall fit score (% of must-haves met as Strong or Partial match).
-5. Output:
-   - Fit score + verdict ("Strong Candidate", "Good Candidate — Address Gaps", "Stretch Role").
-   - A "what to emphasize" list for the cover letter and interview.
-   - A "gap bridging" suggestion for each ❌ (e.g., "highlight X from your Alexa experience").
-6. Save the fit analysis as a .docx report to `$SESSION_ROOT/Skill_Fitness_Analysis/`:
-   `Skill_Fitness_Analysis/FitAnalysis_[Company]_[Role].docx`
-   If analyzing multiple roles at once, save a combined report:
-   `Skill_Fitness_Analysis/FitAnalysis_All_Roles_[date].docx`
-7. Ask: "Want me to write a cover letter tailored to this role?"
+5. Calculate fit score: % of must-haves met as ✅ or 🟡.
+6. Output:
+   - Fit score + verdict: "Strong Candidate" (≥80%), "Good Candidate — Address Gaps" (60–79%), "Stretch Role" (<60%).
+   - "What to emphasize" list for the cover letter and interview.
+   - Gap-bridging suggestion for each ❌.
 
 ---
 
-## Module 10: Resume Customization
+## Module 4: Find Referral & Recruiter
 
-**Trigger phrases:** "customize my resume", "tailor resume", "update resume for this role",
-"resume for job description", "tweak my resume", "optimize resume"
-
-The goal is to produce a version of Divakar's resume that is precisely tuned for a specific job
-description — emphasizing the most relevant experiences, mirroring the JD's language for ATS
-optimization, and surfacing the right achievements without fabricating anything.
+**Trigger phrases:** "find me a referral", "who do I know at X", "find a recruiter at Y", "who's hiring at Z"
 
 ### Steps
-
-1. **Get the JD** — user pastes it, or retrieve via `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__get_job_details`.
-
-2. **Run a fit analysis first** (Module 9) if not already done — identifies which experiences to
-   emphasize (✅), which to reframe (🟡), and which to downplay (❌ gaps).
-
-3. **Read `references/resume_customization_guide.md`** for detailed rewriting rules.
-
-4. **Customize the resume** by making targeted edits across these sections:
-
-   - **Profile Summary** — Rewrite the top 3-4 lines to mirror the JD's exact language and role title.
-     If the JD says "Staff TPM", lead with that. If it emphasizes "AI infrastructure", surface that.
-
-   - **Experience bullets** — For each relevant role, rewrite up to 3 bullets to:
-     - Use verbs and keywords from the JD (e.g., if JD says "drove alignment", use "drove alignment")
-     - Lead with the metric most relevant to the role (revenue, scale, speed, team size)
-     - Remove or compress bullets for unrelated work at that company
-
-   - **Skills section** — Reorder to put JD-matched skills first. Add any skills Divakar has but
-     that weren't prominent in the original resume (e.g., if JD emphasizes "OKRs" and Divakar uses
-     them but didn't list it explicitly).
-
-   - **Section ordering** — If the JD is heavily AI/ML focused, move the AI/ML skills cluster to
-     the top of the Skills section. If it's a Program Management role, lead with PM skills.
-
-5. **ATS check** — Scan the customized resume for the JD's top 10 keywords. Flag any that are
-   missing and suggest natural insertion points.
-
-6. **Output** — Save as a .docx file using the `docx` skill to `$SESSION_ROOT/resumes_p13n/`:
-   `resumes_p13n/Resume_[Company]_[Role]_[FitScore]_[Verdict].docx`
-   Example: `resumes_p13n/Resume_Google_SrPM_ImageSearch_94_Strong.docx`
-   Preserve the original ATS-friendly formatting from the base resume.
-
-7. **Show a change summary** — List what was changed and why, so Divakar can review and approve
-   before sending. Format as: `[Section] → [What changed] → [Why: matches JD requirement X]`
-
-### Important rules
-- Never fabricate experience, metrics, or skills not present in `references/profile.md`.
-- Keep changes targeted — only edit what improves fit. Don't rewrite everything.
-- Preserve the ATS-friendly structure (no tables, no text boxes, clean heading hierarchy).
-- If a gap is real and can't be bridged, note it honestly rather than obscuring it.
+1. Identify the target company from user input or prior job search results.
+2. Search Apollo (`mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__apollo_mixed_people_api_search`) in parallel:
+   - **Recruiters**: title filters — "Recruiter", "Talent Acquisition", "Technical Sourcer", "Engineering Recruiter"
+   - **Referrals**: title filters — "Senior Product Manager", "TPM", "Engineering Manager", "Director of Product"
+3. Present: top 2-3 recruiters and top 2-3 referrals with Name | Title | LinkedIn URL | Email (if available).
 
 ---
 
-## Workflow Chains
+## Module 5: Cover Letter — To a Referral
 
-These modules are designed to chain together naturally. Common flows:
+**Trigger phrases:** "cover letter to referral", "write a note for referral", "intro request", "referral outreach"
 
-**Full Application Flow**: Module 1 → Module 9 → Module 10 → Module 3 or 4 → Module 2
-*Find jobs → Fit analysis → Customize resume → Cover letter → Find referral*
+**Key facts (no profile read needed):**
+- Divakar BV | divakarbv@gmail.com | www.linkedin.com/in/divakarbv | www.divakarbv.tech
+- Top achievements: $60M search revenue at Amazon (15+ countries); Meta Marketplace AI roadmap; Alexa launch in 6 countries; AWS EC2 (10 regions, CEO-level pricing approval); SynergIQ — Agentic AI / RAG LLM
 
-**Portfolio Prep**: Module 5 → Module 6
-*Timeline → AI Portfolio*
+### Steps
+1. Get target person's name, title, and company (from Module 4 or user input).
+2. Get the target role (from Module 1 or user input).
+3. Write a 3-paragraph letter using this structure:
+   - **Para 1 (~40 words):** Establish the connection — mutual contact, shared experience, or admired work.
+     If cold: "I know this is a cold ask, but I've admired [Company]'s approach to X."
+   - **Para 2 (~80 words):** Pick the 1-2 most relevant achievements above. Lead with brand + outcome.
+     Connect directly to what the company or role cares about. Use specific numbers.
+   - **Para 3 (~40 words):** Easy, specific ask — "Would you be open to a 15-min call?" or
+     "Would you be comfortable forwarding my resume to the hiring team?"
+4. Constraints: under 200 words total. No buzzwords ("synergy", "leverage", "passionate about").
+   Do not ask for a job directly. Do not apologize for reaching out.
+5. Save as `[Referral Letter - Company - Person.docx]` using the docx skill.
 
-**Interview Prep**: Module 7 → Module 8
-*Timeslots → 360 Feedback*
+---
+
+## Module 6: Cover Letter — To a Recruiter
+
+**Trigger phrases:** "cover letter to recruiter", "cold outreach recruiter", "email to recruiter", "recruiter note"
+
+**Key facts (no profile read needed):**
+- Divakar BV | divakarbv@gmail.com | www.linkedin.com/in/divakarbv
+- Top achievements: $60M search revenue at Amazon (15+ countries); Meta Marketplace AI roadmap; Alexa launch in 6 countries; AWS EC2 CEO-level pricing approval; SynergIQ — Agentic AI / RAG LLM
+- ATS keywords by role type:
+  - TPM: Technical Program Manager, Cross-functional leadership, OKRs, Roadmap, Agile, Stakeholder management
+  - PM: Product roadmap, Go-to-market, Customer insights, Prioritization, Data-driven, A/B testing
+  - AI: AI/ML, Generative AI, LLM, Recommendation engine, Search relevance, Prompt engineering
+
+### Steps
+1. Get the recruiter's name, company, and target role from user input or Module 4.
+2. Write a 3-paragraph letter using this structure:
+   - **Para 1 (~60 words):** Open with strongest brand + outcome. Do NOT start with "I am writing to..."
+     or "My name is...". Start with the bold credential: "I led AI/ML product roadmaps at Meta and Amazon —
+     delivering $60M in search revenue across 15+ countries..."
+   - **Para 2 (~100 words):** Connect 2-3 specific experiences to the company's known products, challenges,
+     or the role's key responsibilities. Show homework done.
+   - **Para 3 (~40 words):** "I'd welcome a 15-minute call to explore whether there's a fit.
+     My resume is attached — happy to answer any questions or share more context."
+3. Constraints: under 250 words total. Include relevant ATS keywords from the list above.
+4. Save as `[Recruiter Letter - Company - Role.docx]` using the docx skill.
+
+---
+
+## Workflow Chain
+
+**Full Application Flow**: Module 1 → Module 3 → Module 2 → Module 5 or 6 → Module 4
+*Find jobs → Fit analysis → Build custom resume → Cover letter → Find referral*
+
+**Quick Apply Flow**: Module 2 → Module 6
+*Paste JD → Build resume → Write recruiter cover letter*
 
 ---
 
 ## Notes
 
-### Folder structure (always created by Module 0 at session start)
-
-```
-WBR2026_3_14_Claude/
-  JobSearch_YYYY-MM-DD_[SearchTerm]/       ← SESSION ROOT
-    Job_Search_Results_[date].docx         ← Job search table (Module 1) — at ROOT level
-    Recruiters_and_Referrals_[date].docx   ← Recruiter/referral guide (Module 2) — at ROOT level
-    resumes_p13n/                          ← Customized resumes (Module 10)
-    Coverletters/                          ← Cover letters to referrals + recruiters (Modules 3 & 4)
-    IG_timeline/                           ← Infographic career timeline HTML (Module 5)
-    AIP/                                   ← AI portfolio HTML (Module 6)
-    Skill_Fitness_Analysis/                ← Fit analysis reports + 360 feedback (Modules 9 & 8)
-```
-
-> **Job search results file** (`Job_Search_Results_[date].docx`) and the **Recruiters & Referrals**
-> file go directly in the **session root folder** — not in a subfolder — so they're the first thing
-> visible when opening the session folder.
-
-### Tool references
+- Resume templates: `/sessions/gallant-cool-volta/mnt/JobAgent/Templates/`
+- Resume generator base: `/sessions/gallant-cool-volta/resume-gen/generate_templates.js`
+- Resume output folder: `/sessions/gallant-cool-volta/mnt/JobAgent/Outputs/[YYYY-MM-DD]/`
+- Resume rules: `references/resume_instructions.md`
 - For .docx files, use the `docx` skill.
-- For .pptx files, use the `pptx` skill.
-- Apollo: `mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__*` (requires paid plan for people search)
+- Apollo tools: `mcp__ba4d1715-a56f-4d5e-aaba-a7e30318f18d__*`
 - Indeed: `mcp__fcaeee7c-d0bb-4d33-8a21-3c21be1bc23c__search_jobs`
 - Dice: `mcp__eef6ddc6-db09-4609-aaee-84a402ca5245__search_jobs`
-- Workspace base: `/sessions/pensive-vibrant-meitner/mnt/WBR2026_3_14_Claude/`
