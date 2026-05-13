@@ -60,6 +60,12 @@ Edit the constants at the top of `espanso_server.py`:
 | `PORT` | `7890` | Local server port |
 | `MAX_BACKUPS` | `5` | Backups kept in the match folder before archiving |
 
+## Written About
+
+- [LinkedIn — AI Just Changed Software Economics](https://www.linkedin.com/pulse/ai-just-changed-software-economics-divakar-bv-mba-aipc-pmp-k5eme/)
+- [X / Twitter](https://x.com/divakarbv/status/2054399924402565195?s=20)
+- [Substack — AI Just Changed Software Economics](https://divakarbv.substack.com/p/ai-just-changed-software-economics)
+
 ## License
 
 MIT
