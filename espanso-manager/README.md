@@ -4,6 +4,23 @@ A visual CRUD interface for managing [Espanso](https://espanso.org) text expansi
 
 ![Dark UI with search, tags, and expansion cards](https://img.shields.io/badge/UI-Dark%20Theme-7c6fff?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python) ![Zero dependencies](https://img.shields.io/badge/dependencies-none%20(stdlib%20only)-success?style=flat-square)
 
+## Screenshots
+
+### Before & After — YAML editing vs. the new UI
+![Before and After](images/Espanso_Old_New.png)
+
+### Espanso Manager UI
+![New UI](images/NewUI.jpg)
+
+### Full UI View
+![Full UI](images/defaultview.jpg)
+
+### Architecture
+![Architecture Diagram](images/Espanso_manager_design.jpg)
+
+### Case Study Banner
+![Case Study](images/image_dc936277.png)
+
 ## Features
 
 - **Full CRUD** — Add, edit, and delete text expansions through a clean browser UI
