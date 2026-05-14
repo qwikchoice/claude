@@ -1,0 +1,365 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  AWAITING_PAYMENT
+  CONFIRMED
+  REJECTED
+  CANCELED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+// ─────────────────────────────────────────────
+// NextAuth Models
+// ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(CUSTOMER)
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  bookings  Booking[]
+  accounts  Account[]
+  sessions  Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─────────────────────────────────────────────
+// RV Models
+// ─────────────────────────────────────────────
+
+model RV {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  tagline         String
+  theme           String
+  description     String   @db.Text
+  longDescription String?  @db.Text
+  bestFor         String[]
+  vibe            String[]
+  maxGuests       Int
+  bedrooms        Int      @default(1)
+  bathrooms       Float    @default(1)
+  amenities       String[]
+  images          String[]
+  emoji           String
+  colorScheme     String
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  priceRules RVPriceRule[]
+  bookings   Booking[]
+  blockouts  CalendarBlockout[]
+}
+
+model RVPriceRule {
+  id          String   @id @default(cuid())
+  rvId        String
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  nightlyRate Decimal  @db.Decimal(10, 2)
+  weekendRate Decimal? @db.Decimal(10, 2)
+  minNights   Int      @default(2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rv RV @relation(fields: [rvId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// Destination Model
+// ─────────────────────────────────────────────
+
+model Destination {
+  id                       String   @id @default(cuid())
+  name                     String
+  slug                     String   @unique
+  description              String   @db.Text
+  longDescription          String?  @db.Text
+  location                 String?
+  campgroundFeeEstimate    String?
+  campgroundFeeNote        String?
+  campgroundFeeDisclaimer  String?
+  hookupAvailable          Boolean  @default(false)
+  activities               String[]
+  highlights               String[]
+  images                   String[]
+  emoji                    String
+  isActive                 Boolean  @default(true)
+  sortOrder                Int      @default(0)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+// ─────────────────────────────────────────────
+// AddOn Models
+// ─────────────────────────────────────────────
+
+model AddOn {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String   @db.Text
+  longDescription String?  @db.Text
+  basePrice       Decimal  @db.Decimal(10, 2)
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  priceRules    AddOnPriceRule[]
+  bookingAddOns BookingAddOn[]
+}
+
+model AddOnPriceRule {
+  id        String   @id @default(cuid())
+  addOnId   String
+  startDate DateTime
+  endDate   DateTime
+  price     Decimal  @db.Decimal(10, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addOn AddOn @relation(fields: [addOnId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// Booking Models
+// ─────────────────────────────────────────────
+
+model Booking {
+  id                  String        @id @default(cuid())
+  userId              String
+  rvId                String
+  destinationId       String
+  checkIn             DateTime
+  checkOut            DateTime
+  nights              Int
+  guests              Int
+  petRequest          Boolean       @default(false)
+  petNotes            String?       @db.Text
+  specialRequests     String?       @db.Text
+  status              BookingStatus @default(PENDING)
+  nightlyRateSnapshot Decimal       @db.Decimal(10, 2)
+  subtotal            Decimal       @db.Decimal(10, 2)
+  cleaningFee         Decimal       @db.Decimal(10, 2)
+  addOnTotal          Decimal       @default(0) @db.Decimal(10, 2)
+  depositAmount       Decimal?      @db.Decimal(10, 2)
+  depositPercent      Int?
+  taxAmount           Decimal?      @db.Decimal(10, 2)
+  taxPercent          Int?
+  total               Decimal       @db.Decimal(10, 2)
+  stripePaymentLinkId  String?
+  stripePaymentLinkUrl String?
+  stripePaymentIntentId String?
+  paidAt              DateTime?
+  refundAmount        Decimal?      @db.Decimal(10, 2)
+  refundStatus        String?
+  termsAccepted       Boolean       @default(false)
+  termsAcceptedAt     DateTime?
+  termsVersion        String?
+  termsUrl            String?
+  termsIpAddress      String?
+  adminNotes          String?       @db.Text
+  rejectionReason     String?       @db.Text
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id])
+  rv          RV               @relation(fields: [rvId], references: [id])
+  destination Destination      @relation(fields: [destinationId], references: [id])
+  lineItems   BookingLineItem[]
+  addOns      BookingAddOn[]
+  payments    Payment[]
+  termsAcceptance TermsAcceptance?
+}
+
+model BookingLineItem {
+  id          String   @id @default(cuid())
+  bookingId   String
+  description String
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  total       Decimal  @db.Decimal(10, 2)
+  type        String
+  createdAt   DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model BookingAddOn {
+  id        String  @id @default(cuid())
+  bookingId String
+  addOnId   String
+  price     Decimal @db.Decimal(10, 2)
+  quantity  Int     @default(1)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  addOn   AddOn   @relation(fields: [addOnId], references: [id])
+}
+
+// ─────────────────────────────────────────────
+// Payment Model
+// ─────────────────────────────────────────────
+
+model Payment {
+  id                    String        @id @default(cuid())
+  bookingId             String
+  stripePaymentIntentId String?
+  stripeChargeId        String?
+  amount                Decimal       @db.Decimal(10, 2)
+  status                PaymentStatus
+  refundAmount          Decimal?      @db.Decimal(10, 2)
+  refundReason          String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// Terms Models
+// ─────────────────────────────────────────────
+
+model TermsDocument {
+  id        String   @id @default(cuid())
+  version   String
+  url       String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  acceptances TermsAcceptance[]
+}
+
+model TermsAcceptance {
+  id              String   @id @default(cuid())
+  bookingId       String   @unique
+  termsDocumentId String
+  acceptedAt      DateTime @default(now())
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  termsDocument TermsDocument @relation(fields: [termsDocumentId], references: [id])
+}
+
+// ─────────────────────────────────────────────
+// Calendar Blockout
+// ─────────────────────────────────────────────
+
+model CalendarBlockout {
+  id        String   @id @default(cuid())
+  rvId      String
+  startDate DateTime
+  endDate   DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rv RV @relation(fields: [rvId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// Site Settings
+// ─────────────────────────────────────────────
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// Lead Inquiry
+// ─────────────────────────────────────────────
+
+model LeadInquiry {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  preferredDates  String?
+  destination     String?
+  groupSize       String?
+  experienceType  String?
+  message         String?  @db.Text
+  source          String?
+  createdAt       DateTime @default(now())
+}
