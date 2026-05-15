@@ -2,6 +2,7 @@ import { NextAuthOptions, getServerSession } from 'next-auth'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
+import CredentialsProvider from 'next-auth/providers/credentials'
 import { UserRole } from '@prisma/client'
 import prisma from './prisma'
 import type { Session } from 'next-auth'
@@ -30,9 +31,13 @@ declare module 'next-auth/jwt' {
   }
 }
 
+// PrismaAdapter is incompatible with CredentialsProvider (which requires JWT).
+// In dev we skip the adapter so both dev-credential shortcuts and JWT work.
+const adapter = process.env.NODE_ENV === 'development' ? undefined : PrismaAdapter(prisma)
+
 export const authOptions: NextAuthOptions = {
   // @ts-expect-error — PrismaAdapter type mismatch between @auth/prisma-adapter and next-auth v4
-  adapter: PrismaAdapter(prisma),
+  adapter,
 
   providers: [
     GoogleProvider({
@@ -51,6 +56,42 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.FACEBOOK_CLIENT_ID!,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
     }),
+
+    // Dev-only credentials bypass — NEVER enabled in production
+    ...(process.env.NODE_ENV === 'development'
+      ? [
+          CredentialsProvider({
+            id: 'dev-admin',
+            name: 'Dev Admin',
+            credentials: { password: { label: 'Dev password', type: 'password' } },
+            async authorize(credentials) {
+              if (credentials?.password !== 'devadmin') return null
+              const admin = await prisma.user.findFirst({
+                where: { role: 'ADMIN' },
+              })
+              if (!admin) return null
+              return { id: admin.id, name: admin.name, email: admin.email, role: admin.role }
+            },
+          }),
+          CredentialsProvider({
+            id: 'dev-customer',
+            name: 'Dev Customer',
+            credentials: { password: { label: 'Dev password', type: 'password' } },
+            async authorize(credentials) {
+              if (credentials?.password !== 'devuser') return null
+              let customer = await prisma.user.findFirst({
+                where: { role: 'CUSTOMER' },
+              })
+              if (!customer) {
+                customer = await prisma.user.create({
+                  data: { name: 'Test Customer', email: 'test@example.com', role: 'CUSTOMER' },
+                })
+              }
+              return { id: customer.id, name: customer.name, email: customer.email, role: customer.role }
+            },
+          }),
+        ]
+      : []),
 
     // Apple OAuth — requires additional setup:
     // 1. Apple Developer account with Sign in with Apple enabled

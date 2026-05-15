@@ -25,11 +25,23 @@ export default function LoginPage() {
     : null
 
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
+  const isDev = process.env.NODE_ENV === 'development'
 
   async function handleSignIn(provider: 'google' | 'facebook' | 'apple') {
     setLoadingProvider(provider)
     try {
       await signIn(provider, { callbackUrl })
+    } catch {
+      setLoadingProvider(null)
+    }
+  }
+
+  async function handleDevLogin(role: 'dev-admin' | 'dev-customer') {
+    setLoadingProvider(role)
+    const password = role === 'dev-admin' ? 'devadmin' : 'devuser'
+    const dest = role === 'dev-admin' ? '/admin' : (callbackUrl ?? '/dashboard')
+    try {
+      await signIn('credentials', { password, callbackUrl: dest, redirect: true })
     } catch {
       setLoadingProvider(null)
     }
@@ -133,6 +145,40 @@ export default function LoginPage() {
               <span>Continue with Apple</span>
             </button>
           </div>
+
+          {/* Dev-only login — never shown in production */}
+          {isDev && (
+            <div className="mt-6 pt-6 border-t border-dashed border-amber-200">
+              <p className="text-center text-xs text-amber-700 font-semibold uppercase tracking-wider mb-3">
+                🛠 Dev Mode Shortcuts
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleDevLogin('dev-admin')}
+                  disabled={loadingProvider !== null}
+                  className="flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold py-2.5 px-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loadingProvider === 'dev-admin' ? (
+                    <span className="w-4 h-4 border-2 border-amber-300 border-t-white rounded-full animate-spin" />
+                  ) : '🔑'}
+                  Admin Login
+                </button>
+                <button
+                  onClick={() => handleDevLogin('dev-customer')}
+                  disabled={loadingProvider !== null}
+                  className="flex items-center justify-center gap-2 bg-stone-600 hover:bg-stone-700 text-white text-sm font-semibold py-2.5 px-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loadingProvider === 'dev-customer' ? (
+                    <span className="w-4 h-4 border-2 border-stone-400 border-t-white rounded-full animate-spin" />
+                  ) : '👤'}
+                  Customer Login
+                </button>
+              </div>
+              <p className="text-center text-stone-400 text-xs mt-2">
+                Only visible in development · Not available in production
+              </p>
+            </div>
+          )}
 
           {/* No account needed note */}
           <p className="text-center text-stone-500 text-sm mt-6 leading-relaxed">
