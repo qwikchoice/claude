@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import FAQ, { faqItems } from '@/components/marketing/FAQ'
+import FAQ from '@/components/marketing/FAQ'
+import { faqItems } from '@/components/marketing/faq-data'
 import Link from 'next/link'
 
 export const metadata: Metadata = {

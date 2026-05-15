@@ -4,7 +4,7 @@ const testimonials = [
     location: 'Folsom, CA',
     stars: 5,
     quote:
-      'We had zero RV experience and were nervous. But we just drove our Prius to Folsom Lake and the RV was already set up and beautiful. It was the most relaxing family weekend we've had in years.',
+      "We had zero RV experience and were nervous. But we just drove our Prius to Folsom Lake and the RV was already set up and beautiful. It was the most relaxing family weekend we've had in years.",
     avatar: 'SM',
     avatarBg: 'bg-amber-100',
     avatarText: 'text-amber-700',
