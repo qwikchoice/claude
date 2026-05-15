@@ -1,88 +1,70 @@
 # Espanso Manager
 
-A visual CRUD interface for managing [Espanso](https://espanso.org) text expansions — no dependencies required.
+Visual CRUD interface for Espanso text expansions — backups, archiving, export/import, search, tags, and notes.
 
-![Dark UI with search, tags, and expansion cards](https://img.shields.io/badge/UI-Dark%20Theme-7c6fff?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python) ![Zero dependencies](https://img.shields.io/badge/dependencies-none%20(stdlib%20only)-success?style=flat-square)
+---
 
-## Screenshots
+## Requirements
 
-### Before & After — YAML editing vs. the new UI
-![Before and After](images/Espanso_Old_New.png)
+- Python 3 (stdlib only, no pip installs needed)
+- Chrome or Edge (for File System Access API)
 
-### Espanso Manager UI
-![New UI](images/NewUI.jpg)
+---
 
-### Full UI View
-![Full UI](images/defaultview.jpg)
+## Installation
 
-### Architecture
-![Architecture Diagram](images/Espanso_manager_design.jpg)
+### Windows
 
-### Case Study Banner
-![Case Study](images/image_dc936277.png)
-
-## Features
-
-- **Full CRUD** — Add, edit, and delete text expansions through a clean browser UI
-- **Simple & Advanced modes** — Toggle between plain text entry and raw YAML for complex matches (date vars, shell commands, forms)
-- **Search & filter** — Live search across triggers and replacement text; filter by tags
-- **Tags & Notes** — Attach metadata to any expansion (stored in a sidecar `base.meta.json`, invisible to Espanso)
-- **Auto-backup** — Every save creates a timestamped backup; older ones are auto-archived (configurable limit)
-- **Export / Import** — Round-trip your expansions as YAML, JSON, or CSV
-- **Zero dependencies** — Python stdlib only; the HTML UI loads `js-yaml` from a CDN
-
-## Quick Start
-
-1. **Install Python** (3.8+) — make sure it's on your PATH
-2. Copy `espanso_server.py`, `espanso-manager.html`, and `start_espanso.bat` into your Espanso `match` folder:
+1. Copy this `match` folder into your Espanso config directory:
    ```
-   %AppData%\espanso\match\
+   %AppData%\espanso\match
    ```
-3. Double-click **`start_espanso.bat`** (or run `python espanso_server.py`)
-4. Your browser opens at `http://localhost:7890` — start managing expansions
+2. Run `windows\start_espanso.bat` — double-click it.
+3. Browser opens automatically at `http://localhost:7890`.
 
-## How It Works
+> **Python not found?** Download from https://python.org — check "Add Python to PATH" during install.
 
-```
-start_espanso.bat
-      │
-      └─► espanso_server.py  (stdlib HTTPServer on :7890)
-                │
-                ├── GET /          → serves espanso-manager.html
-                ├── GET /api/load  → reads base.yml + base.meta.json
-                └── POST /api/save → writes files + creates timestamped backup
-```
+---
 
-The HTML file is fully self-contained and also works standalone via the **File System Access API** in Chrome/Edge — just open it directly in the browser and grant access to your `match` folder.
+### Mac
 
-## File Layout
+1. Copy this `match` folder into your Espanso config directory:
+   ```
+   ~/Library/Application Support/espanso/match
+   ```
+2. Run the launcher:
+   - **Double-click:** `mac/start_espanso.command` (opens Terminal automatically)
+   - **Terminal:** `./mac/start_espanso.sh`
+
+   First run may show a macOS security prompt — click **Open**.
+
+3. Browser opens automatically at `http://localhost:7890`.
+
+> **Python not found?** Run `brew install python` or download from https://python.org.
+
+---
+
+## File Structure
 
 ```
 match/
-├── espanso_server.py       ← API server (this repo)
-├── espanso-manager.html    ← UI (this repo)
-├── start_espanso.bat       ← launcher (this repo)
-├── base.yml                ← your expansions (managed by this tool)
-├── base.meta.json          ← tags & notes sidecar (managed by this tool)
-├── base_backup_<ts>.yml    ← rolling backups (auto-created)
-└── archive/                ← older backups (auto-moved here)
+├── base.yml                  ← your Espanso snippets (edit via the UI)
+├── base.meta.json            ← tags/notes metadata
+├── espanso_server.py         ← local API server
+├── espanso-manager.html      ← UI (served by the server)
+├── windows/
+│   └── start_espanso.bat     ← Windows launcher
+├── mac/
+│   ├── start_espanso.command ← Mac launcher (double-click)
+│   └── start_espanso.sh      ← Mac launcher (terminal)
+└── archive/                  ← auto-archived old backups
 ```
 
-## Configuration
+---
 
-Edit the constants at the top of `espanso_server.py`:
+## Usage
 
-| Variable | Default | Description |
-|---|---|---|
-| `PORT` | `7890` | Local server port |
-| `MAX_BACKUPS` | `5` | Backups kept in the match folder before archiving |
+- **Server mode** (recommended): use a launcher above — no folder picker needed.
+- **Standalone mode**: open `espanso-manager.html` directly in Chrome/Edge, then click "Open Espanso Folder" and grant access to the `match` folder.
 
-## Written About
-
-- [LinkedIn — AI Just Changed Software Economics](https://www.linkedin.com/pulse/ai-just-changed-software-economics-divakar-bv-mba-aipc-pmp-k5eme/)
-- [X / Twitter](https://x.com/divakarbv/status/2054399924402565195?s=20)
-- [Substack — AI Just Changed Software Economics](https://divakarbv.substack.com/p/ai-just-changed-software-economics)
-
-## License
-
-MIT
+Backups are created automatically on every save. Up to 5 backups stay in `match/`; older ones move to `archive/`.
